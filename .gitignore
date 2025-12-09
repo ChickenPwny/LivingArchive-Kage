@@ -1,0 +1,100 @@
+# Trash directory - deprecated/removed files
+@trash/
+**/@trash/
+
+# Development documentation
+@docs/
+**/@docs/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Flask/SQLite
+*.db
+*.sqlite
+*.sqlite3
+instance/
+.webassets-cache
+
+# Scan Results and Data
+scan_results/
+*.json
+!package.json
+!config/*.json
+
+# Secrets and Credentials
+credentials.json
+client_secret*.json
+.env
+.env.local
+secrets/
+*.key
+*.pem
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Distribution
+dist/
+*.tar.gz
+
+# Nmap output
+*.xml
+*.nmap
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Django (deprecated - keeping for reference)
+# These are now in @trash/ but keeping patterns in case
+db.sqlite3
+staticfiles/
+ryu_app/
+ryu_project/
+manage.py
+daemon_api.py

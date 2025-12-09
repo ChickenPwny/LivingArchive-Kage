@@ -1,0 +1,142 @@
+{% extends "reconnaissance/base.html" %}
+
+{% block title %}Reconnaissance Overview{% endblock %}
+
+{% block extra_styles %}
+    :root { --accent-color: #8b5cf6; }
+{% endblock %}
+
+{% block content %}
+<a href="/reconnaissance/" class="back-link">← Back to Reconnaissance</a>
+
+<div class="page-header">
+    <div class="icon">🔍</div>
+    <div>
+        <h2>Reconnaissance Overview</h2>
+        <p class="subtitle">PortScanner network scanning activities</p>
+    </div>
+</div>
+
+{% if error %}
+<div class="error-message">
+    <strong>Database Error:</strong> {{ error }}
+</div>
+{% endif %}
+
+<div class="stats-grid" style="grid-template-columns: repeat(5, 1fr);">
+    <div class="stat-card">
+        <div class="label">🔍 PortScanner Scans</div>
+        <div class="value">{{ kage_scan_count }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Total Activities</div>
+        <div class="value">{{ total_count }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Open Ports</div>
+        <div class="value">{{ total_count }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="label">Services Detected</div>
+        <div class="value">{{ kage_scan_count }}</div>
+    </div>
+    <a href="/reconnaissance/eggrecords/" class="stat-card" style="text-decoration: none; cursor: pointer; transition: transform 0.2s; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">
+        <div class="label" style="color: white;">🥚 EggRecords</div>
+        <div class="value" style="color: white; font-size: 1.5rem;">→</div>
+    </a>
+</div>
+
+<div style="margin-top: 20px; margin-bottom: 15px; display: flex; gap: 15px; align-items: center;">
+    <h3 style="margin: 0; color: #8b5cf6;">🔍 All Activities</h3>
+    <div style="display: flex; gap: 10px; margin-left: auto;">
+        <a href="/kage/" style="padding: 8px 16px; background: #3b82f6; color: white; border-radius: 4px; text-decoration: none; font-size: 0.9rem;">🔍 Kage PortScanner</a>
+    </div>
+</div>
+
+<div class="data-table">
+    <table>
+        <thead>
+            <tr>
+                <th>Personality</th>
+                <th>Type</th>
+                <th>Target</th>
+                <th>Status</th>
+                <th>Port</th>
+                <th>Service</th>
+                <th>Details</th>
+                <th>Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for activity in activities %}
+            <tr>
+                <td>
+                    {% if activity.personality == 'kage' %}
+                        <span style="color: #3b82f6; font-weight: bold;">🔍 Kage PortScanner</span>
+                    {% else %}
+                        <span style="color: #64748b;">Kage</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if activity.activity_type == 'scan' %}
+                        <span style="color: #3b82f6;">Scan</span>
+                    {% elif activity.activity_type == 'assessment' %}
+                        <span style="color: #8b5cf6;">Assessment</span>
+                    {% else %}
+                        {{ activity.activity_type|default:"N/A" }}
+                    {% endif %}
+                </td>
+                <td>{{ activity.target|truncatechars:40 }}</td>
+                <td>
+                    <span class="status-badge {% if activity.scan_status == 'completed' %}success{% elif activity.scan_status == 'failed' %}error{% elif activity.scan_status == 'high' or activity.scan_status == 'critical' %}error{% elif activity.scan_status == 'medium' %}warning{% else %}info{% endif %}">
+                        {{ activity.scan_status }}
+                    </span>
+                </td>
+                <td>{{ activity.port }}</td>
+                <td>{{ activity.service_name|truncatechars:30 }}</td>
+                <td class="json-cell" title="{{ activity.open_ports }}">{{ activity.open_ports|truncatechars:50 }}</td>
+                <td>{{ activity.created_at|date:"Y-m-d H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" style="text-align: center; color: #94a3b8;">No activities available</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if activities.has_other_pages %}
+<div class="pagination" style="margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 10px;">
+    {% if activities.has_previous %}
+        <a href="?page=1" style="padding: 8px 12px; background: #1e293b; color: #8b5cf6; border-radius: 4px; text-decoration: none;">« First</a>
+        <a href="?page={{ activities.previous_page_number }}" style="padding: 8px 12px; background: #1e293b; color: #8b5cf6; border-radius: 4px; text-decoration: none;">‹ Prev</a>
+    {% endif %}
+    
+    <span style="color: #94a3b8; padding: 8px 12px;">
+        Page {{ activities.number }} of {{ activities.paginator.num_pages }} ({{ total_count }} total)
+    </span>
+    
+    {% if activities.has_next %}
+        <a href="?page={{ activities.next_page_number }}" style="padding: 8px 12px; background: #1e293b; color: #8b5cf6; border-radius: 4px; text-decoration: none;">Next ›</a>
+        <a href="?page={{ activities.paginator.num_pages }}" style="padding: 8px 12px; background: #1e293b; color: #8b5cf6; border-radius: 4px; text-decoration: none;">Last »</a>
+    {% endif %}
+</div>
+{% endif %}
+
+<div style="margin-top: 30px; padding: 20px; background: #f8fafc; border-radius: 8px;">
+    <h4 style="color: #475569; margin-bottom: 15px;">📊 Activity Breakdown</h4>
+    <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+        <div class="stat-card" style="text-align: center;">
+            <div style="font-size: 1.5rem; color: #3b82f6;">🔍</div>
+            <div class="label">PortScanner Scans</div>
+            <div class="value" style="font-size: 1.2rem;">{{ kage_scan_count }}</div>
+            <a href="/reconnaissance/kage/" style="font-size: 0.85rem; color: #3b82f6; text-decoration: none; margin-top: 5px; display: block;">View PortScanner Dashboard →</a>
+        </div>
+            <a href="/kage/" style="font-size: 0.85rem; color: #3b82f6; text-decoration: none; margin-top: 5px; display: block;">View Kage Dashboard →</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+

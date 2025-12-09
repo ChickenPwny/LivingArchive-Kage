@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kage Port Scanner - Agentic AI Extension</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+            min-height: 100vh;
+            color: #e2e8f0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            color: #3b82f6;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .header .icon {
+            font-size: 3.5rem;
+        }
+        
+        .header .subtitle {
+            color: #94a3b8;
+            font-size: 1.2rem;
+            margin-top: 10px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: rgba(30, 58, 95, 0.6);
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            text-align: center;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: #3b82f6;
+        }
+        
+        .stat-card .label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card .value {
+            color: #3b82f6;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .action-card {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            padding: 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: white;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: block;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+        }
+        
+        .action-card .icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        .action-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .action-card p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.95rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(30, 58, 95, 0.4);
+            border-radius: 8px;
+            border: 2px dashed rgba(59, 130, 246, 0.3);
+        }
+        
+        .empty-state h2 {
+            color: #94a3b8;
+            margin-bottom: 15px;
+        }
+        
+        .empty-state p {
+            color: #64748b;
+            margin-bottom: 25px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            margin: 5% auto;
+            padding: 40px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            color: #e2e8f0;
+        }
+        
+        .close {
+            color: #94a3b8;
+            float: right;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .close:hover {
+            color: #3b82f6;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 6px;
+            font-size: 14px;
+            background: rgba(15, 23, 42, 0.6);
+            color: #e2e8f0;
+            box-sizing: border-box;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .form-help {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 5px;
+        }
+        
+        .error-message {
+            color: #ef4444;
+            margin-top: 10px;
+            padding: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 6px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            display: none;
+        }
+        
+        .success-message {
+            color: #10b981;
+            margin-top: 10px;
+            padding: 12px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 6px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            display: none;
+        }
+        
+        .ai-status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .ai-status.available {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .ai-status.unavailable {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <span class="icon">🔍</span>
+                Kage Port Scanner
+            </h1>
+            <p class="subtitle">Agentic AI Extension for LivingArchive-clean</p>
+            <span id="aiStatus" class="ai-status unavailable">Checking AI Status...</span>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="label">Total EggRecords</div>
+                <div class="value" id="totalEggrecords">{{ total_eggrecords }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Alive Targets</div>
+                <div class="value" id="aliveEggrecords">{{ alive_eggrecords }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Total Scans</div>
+                <div class="value" id="totalScans">{{ total_scans }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Recent Scans (24h)</div>
+                <div class="value" id="recentScans">{{ recent_scans_24h }}</div>
+            </div>
+        </div>
+        
+        <div class="actions-grid">
+            <a href="/general/" class="action-card">
+                <div class="icon">📊</div>
+                <h3>General Dashboard</h3>
+                <p>View all scanning activities and statistics</p>
+            </a>
+            <a href="/kage/" class="action-card">
+                <div class="icon">⚡</div>
+                <h3>Kage Dashboard</h3>
+                <p>Detailed port scanning results and analysis</p>
+            </a>
+            <a href="/eggrecords/" class="action-card">
+                <div class="icon">🥚</div>
+                <h3>EggRecords</h3>
+                <p>Manage targets and view scan history</p>
+            </a>
+        </div>
+        
+        {% if is_empty %}
+        <div class="empty-state">
+            <h2>No EggRecords Found</h2>
+            <p>Get started by creating your first target for port scanning.</p>
+            <button class="btn btn-primary" onclick="openModal()">Create Initial Entries</button>
+        </div>
+        {% else %}
+        <div style="text-align: center;">
+            <button class="btn btn-primary" onclick="openModal()">Add New Target</button>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Modal -->
+    <div id="seedModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 style="margin-bottom: 20px; color: #3b82f6;">Create New Target</h2>
+            
+            <div id="errorMessage" class="error-message"></div>
+            <div id="successMessage" class="success-message"></div>
+            
+            <form id="seedForm" onsubmit="submitForm(event)">
+                <div class="form-group">
+                    <label for="subDomain">Subdomain</label>
+                    <input type="text" id="subDomain" name="subDomain" placeholder="api.example.com">
+                    <div class="form-help">Enter a subdomain or domain name (e.g., api.example.com)</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="domainname">Domain Name</label>
+                    <input type="text" id="domainname" name="domainname" placeholder="example.com">
+                    <div class="form-help">Enter the base domain name</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="ip_address">IP Address</label>
+                    <input type="text" id="ip_address" name="ip_address" placeholder="192.168.1.1">
+                    <div class="form-help">Enter an IP address (e.g., 192.168.1.1)</div>
+                </div>
+                
+                <div class="form-group">
+                    <small style="color: #64748b;">* At least one field (Subdomain, Domain, or IP) is required</small>
+                </div>
+                
+                <div style="margin-top: 30px; display: flex; gap: 10px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Create Target</button>
+                    <button type="button" class="btn" onclick="closeModal()" style="flex: 1; background: rgba(100, 116, 139, 0.3); color: #e2e8f0;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Check AI status on page load
+        async function checkAIStatus() {
+            try {
+                const response = await fetch('/api/kage/agentic/status/');
+                const data = await response.json();
+                const statusEl = document.getElementById('aiStatus');
+                if (data.available) {
+                    statusEl.textContent = '🤖 Agentic AI Available';
+                    statusEl.className = 'ai-status available';
+                } else {
+                    statusEl.textContent = '⚠️ Agentic AI Unavailable';
+                    statusEl.className = 'ai-status unavailable';
+                }
+            } catch (error) {
+                document.getElementById('aiStatus').textContent = '⚠️ AI Status Unknown';
+            }
+        }
+        
+        // Check if empty on page load
+        {% if is_empty %}
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                openModal();
+            }, 500);
+        });
+        {% endif %}
+        
+        checkAIStatus();
+
+        function openModal() {
+            document.getElementById('seedModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('seedModal').style.display = 'none';
+            document.getElementById('seedForm').reset();
+            hideMessages();
+        }
+
+        function hideMessages() {
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        async function submitForm(event) {
+            event.preventDefault();
+            hideMessages();
+
+            const formData = {
+                subDomain: document.getElementById('subDomain').value.trim(),
+                domainname: document.getElementById('domainname').value.trim(),
+                ip_address: document.getElementById('ip_address').value.trim()
+            };
+
+            // Validation
+            if (!formData.subDomain && !formData.domainname && !formData.ip_address) {
+                showError('At least one field (Subdomain, Domain, or IP Address) is required');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/eggrecords/create/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess('Target created successfully!');
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showError(data.error || 'An error occurred');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('seedModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
+
+

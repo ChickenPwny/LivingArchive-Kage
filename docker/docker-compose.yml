@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # Django Server (assuming it exists in your setup)
+  django-server:
+    image: ego-webs:latest  # Update with your Django image
+    container_name: recon-django
+    ports:
+      - "9000:9000"
+    restart: unless-stopped
+    networks:
+      - recon-network
+    environment:
+      - DJANGO_SETTINGS_MODULE=EgoQT.src.django_bridge.settings
+    # Add your Django volumes, env vars, etc.
+
+  # Kage Daemon - Port Scanner
+  kage-daemon:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: recon-kage
+    command: python3 /app/daemons/kage_daemon.py
+    restart: unless-stopped
+    depends_on:
+      - django-server
+    networks:
+      - recon-network
+    environment:
+      - DJANGO_API_BASE=http://django-server:9000
+      - KAGE_SCAN_INTERVAL=30
+      - KAGE_MAX_SCANS=5
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://django-server:9000/reconnaissance/api/daemon/kage/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    # No volumes needed for isolated version
+    pid: host  # Use host PID namespace for better signal handling
+
+  # Removed: Kumo and Ryu daemons (deprecated - Kage only)
+
+networks:
+  recon-network:
+    driver: bridge
+
