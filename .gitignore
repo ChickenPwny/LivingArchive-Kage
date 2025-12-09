@@ -5,6 +5,8 @@
 # Development documentation
 @docs/
 **/@docs/
+@@docs/
+**/@@docs/
 
 # Python
 __pycache__/
